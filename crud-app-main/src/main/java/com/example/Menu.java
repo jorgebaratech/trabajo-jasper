@@ -1,14 +1,21 @@
 package com.example;
+import controllers.Conexion;
 import java.time.LocalDateTime;
 import java.util.Scanner;
 
 import controllers.PedidoDAO;
 import controllers.ProductoDAO;
+import java.sql.Connection;
+import java.sql.DriverManager;
 import java.sql.SQLException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import models.Pedido;
 import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.view.JasperViewer;
 
 public class Menu {
 
@@ -88,15 +95,27 @@ public class Menu {
             pedido7.lastMonth();
             pressEnter();
             break;
-        case 8:
+          case 8:
             {
+                Connection con = null;
                 try {
-                    Informe.showReport();
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    con = DriverManager.getConnection("jdbc:mysql://localhost:3306/desayunos_crud?useTimezone=true&serverTimezone=UTC", "root", "");
+                } catch (ClassNotFoundException ex) {
+                    Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
                 } catch (SQLException ex) {
                     Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
                 }
+                HashMap<String, Object> parametros = new HashMap<>();
+                try {
+                    JasperPrint jp = JasperFillManager.fillReport("src/main/java/reports/reporte1.jasper", parametros, Conexion.getConexion());
+                    JasperViewer jv = new JasperViewer(jp, false);
+                    jv.setVisible(true);
+                } catch (JRException ex) {
+                    Logger.getLogger(Menu.class.getName()).log(Level.SEVERE, null, ex);
+                }
             }
-            break;
+       
 
             
         case 9:
@@ -116,5 +135,22 @@ public class Menu {
 		catch(Exception e)
 		{}  
 	}
+    
+    
+    public static void informe(String[] args) {
+    try {
+      Class.forName("com.mysql.jdbc.Driver");
+      Connection connection = DriverManager.getConnection("jdbc:mysql://localhost:3306/database", "user", "password");
+
+      HashMap<String, Object> parameters = new HashMap<>();
+
+      JasperPrint jasperPrint = JasperFillManager.fillReport("reporte1.jasper", parameters, Conexion.getConexion());
+
+      JasperViewer.viewReport(jasperPrint, false);
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+  }
+    
 
 }
